@@ -28,6 +28,10 @@ cat > /etc/chef/first_boot.json << EOF
 <%= JSON.pretty_generate(first_boot) %>
 EOF
 
+cat > /etc/hostname << EOF
+<%= first_boot[:fqdn] %>
+EOF
+
 # Start the chef run
 <% if chef_cmd %>
 <%= chef_cmd %>
