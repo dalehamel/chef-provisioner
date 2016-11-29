@@ -9,6 +9,8 @@ require 'uri/generic'
 
 require File.expand_path('../../lib/chef-provisioner.rb', __FILE__)
 
+FIXTURE_PATH = File.expand_path('fixtures', File.dirname(__FILE__))
+
 # Start a chef server arround chef tests
 module ChefSpec
   def self.append_features(mod)
@@ -28,11 +30,12 @@ def with_chef_server
   server = ChefZero::Server.new(host: uri.host, port: uri.port)
   server.start_background
   yield
+ensure
   server.stop
 end
 
 def match_fixture(name, actual)
-  path = File.expand_path("fixtures/#{name}.txt", File.dirname(__FILE__))
+  path = File.join(FIXTURE_PATH, "#{name}.txt")
   File.open(path, 'w') { |f| f.write(actual) } if ENV['FIXTURE_RECORD']
   expect(actual).to eq(File.read(path))
 end
