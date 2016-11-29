@@ -18,21 +18,24 @@ module ChefProvisioner
 
     def init_server(name, environment: '_default', attributes:{}, run_list:[], force: false)
       nuke(name) if force
-      key = create_client(name) || ''
-      create_node(name, environment, attributes: attributes, run_list: run_list) unless key.empty?
+      key = create_client(name)
+      create_node(name, environment, key, attributes: attributes, run_list: run_list)
       key
     end
 
     def create_client(name)
-      client = ChefAPI::Resource::Client.create(name: name)
+      client = ChefAPI::Connection.new.clients.create(name: name)
       client.private_key
     rescue => e
       puts "Failed to create client #{name}"
       puts e.message
     end
 
-    def create_node(name, environment, attributes:{}, run_list:[])
-      node = ChefAPI::Resource::Node.create(name: name, run_list: run_list)
+    def create_node(name, environment, key, attributes:{}, run_list:[])
+      client_connection = ChefAPI::Connection.new do |connection|
+        connection.key = key
+      end
+      node = client_connection.nodes.create(name: name, run_list: run_list)
       node.chef_environment = environment
       node.automatic = attributes['automatic'] || {}
       node.default = attributes['default'] || {}
@@ -45,14 +48,14 @@ module ChefProvisioner
     end
 
     def delete_client(name)
-      ChefAPI::Resource::Client.destroy(name)
+      ChefAPI::Connection.new.clients.destroy(name)
     rescue => e
       puts "Failed to delete client #{name}"
       puts e.message
     end
 
     def delete_node(name)
-      ChefAPI::Resource::Node.destroy(name)
+      ChefAPI::Connection.new.nodes.destroy(name)
     rescue => e
       puts "Failed to delete node #{name}"
       puts e.message
