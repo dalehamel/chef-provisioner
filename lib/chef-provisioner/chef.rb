@@ -33,6 +33,7 @@ module ChefProvisioner
 
     def create_node(name, environment, key, attributes:{}, run_list:[])
       client_connection = ChefAPI::Connection.new do |connection|
+        connection.client = name
         connection.key = key
       end
       node = client_connection.nodes.create(name: name, run_list: run_list)
