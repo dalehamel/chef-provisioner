@@ -33,6 +33,7 @@ module ChefProvisioner
         attempts += 1
         sleep(5)
       end
+      raise "Unable to get client key. Chef init failed." if client_pem.empty?
       client_pem
     end
   end
