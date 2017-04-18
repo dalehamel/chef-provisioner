@@ -7,6 +7,10 @@ set -e
 <%= "dpkg -s chef | grep -q 'ok installed' ||" unless force_install %>curl -L https://www.opscode.com/chef/install.sh | sudo bash /dev/stdin -v <%= chef_version %>
 rm -rf /etc/chef
 mkdir -p /etc/chef
+if [ $(head -c 3 /sys/hypervisor/uuid) = "ec2" ]; then
+  mkdir -p /etc/chef/ohai/hints
+  touch /etc/chef/ohai/hints/ec2.json
+fi
 
 # Create the node and client writing the private key back here
 cat > /etc/chef/client.pem <<EOF
